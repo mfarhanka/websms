@@ -1,9 +1,3 @@
-CREATE DATABASE IF NOT EXISTS `websms`
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE `websms`;
-
 DROP TABLE IF EXISTS `sms_messages`;
 
 CREATE TABLE `sms_messages` (

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config/database.php';
 
+$appConfig = require __DIR__ . '/config/app.php';
+$configuredDatabaseName = (string) (($appConfig['database']['name'] ?? 'websms'));
+
 $messages = [];
 $stats = [
     'today_count' => 0,
@@ -151,7 +154,9 @@ function websms_initials(?string $senderName, string $senderNumber): string
                                 <p class="mb-0 text-white-50">A minimal PHP and MySQL inbox for receiving SMS webhooks and listing recent messages.</p>
                             </div>
                             <div class="text-start text-lg-end">
-                                <div class="small text-white-50 mb-2">POST endpoint</div>
+                                <div class="small text-white-50 mb-2">Database and API</div>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">DB: <?php echo htmlspecialchars($configuredDatabaseName, ENT_QUOTES, 'UTF-8'); ?></code>
+                                <br>
                                 <code class="bg-white rounded px-3 py-2 d-inline-block">/api/receive_sms.php</code>
                             </div>
                         </div>
@@ -187,10 +192,15 @@ function websms_initials(?string $senderName, string $senderNumber): string
             <div class="col-lg-4">
                 <div class="card surface-card rounded-4 bg-white h-100">
                     <div class="card-body p-4">
-                        <h2 class="h5 mb-3">Fresh database</h2>
-                        <p class="text-muted">Import the SQL dump below into MySQL to create a clean <strong>websms</strong> database.</p>
+                        <h2 class="h5 mb-3">Server setup</h2>
+                        <p class="text-muted">Change the database name, host, user, and password in <strong>config/app.php</strong>, then create that database on your server.</p>
                         <div class="bg-success-subtle rounded-3 p-3 small mb-4">
-                            <div class="fw-semibold text-success mb-2">SQL dump</div>
+                            <div class="fw-semibold text-success mb-2">Editable config</div>
+                            <code>config/app.php</code>
+                        </div>
+                        <div class="bg-success-subtle rounded-3 p-3 small mb-4">
+                            <div class="fw-semibold text-success mb-2">SQL files</div>
+                            <code>db/create_database.sql</code><br>
                             <code>db/websms.sql</code>
                         </div>
 
@@ -220,7 +230,7 @@ Content-Type: application/json
 
                         <?php if ($databaseError !== null): ?>
                             <div class="alert alert-warning mb-0">
-                                Database connection failed. Import <code>db/websms.sql</code> and confirm credentials in <code>config/database.php</code>.
+                                Database connection failed. Create the database from <code>db/create_database.sql</code>, import <code>db/websms.sql</code>, and confirm credentials in <code>config/app.php</code>.
                                 <div class="small mt-2"><?php echo htmlspecialchars($databaseError, ENT_QUOTES, 'UTF-8'); ?></div>
                             </div>
                         <?php elseif ($messages === []): ?>

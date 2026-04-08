@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+$appConfig = require __DIR__ . '/app.php';
+
 function websms_database(): PDO
 {
     static $pdo = null;
@@ -10,11 +12,15 @@ function websms_database(): PDO
         return $pdo;
     }
 
-    $host = getenv('WEBSMS_DB_HOST') ?: '127.0.0.1';
-    $port = getenv('WEBSMS_DB_PORT') ?: '3306';
-    $name = getenv('WEBSMS_DB_NAME') ?: 'websms';
-    $user = getenv('WEBSMS_DB_USER') ?: 'root';
-    $pass = getenv('WEBSMS_DB_PASS') ?: '';
+    global $appConfig;
+
+    $databaseConfig = is_array($appConfig['database'] ?? null) ? $appConfig['database'] : [];
+
+    $host = getenv('WEBSMS_DB_HOST') ?: (string) ($databaseConfig['host'] ?? '127.0.0.1');
+    $port = getenv('WEBSMS_DB_PORT') ?: (string) ($databaseConfig['port'] ?? '3306');
+    $name = getenv('WEBSMS_DB_NAME') ?: (string) ($databaseConfig['name'] ?? 'websms');
+    $user = getenv('WEBSMS_DB_USER') ?: (string) ($databaseConfig['user'] ?? 'root');
+    $pass = getenv('WEBSMS_DB_PASS') ?: (string) ($databaseConfig['pass'] ?? '');
 
     $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $name);
     $options = [
