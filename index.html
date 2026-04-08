@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebSMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        :root {
+            --sms-green-900: #0f3d2e;
+            --sms-green-700: #1d6b4f;
+            --sms-green-500: #2f9e68;
+            --sms-green-100: #e8f6ee;
+            --sms-surface: #f7fbf8;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(47, 158, 104, 0.18), transparent 30%),
+                linear-gradient(180deg, #f9fcfa 0%, #eef7f1 100%);
+            color: #183126;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--sms-green-900), var(--sms-green-700));
+            border: 0;
+            box-shadow: 0 1rem 2rem rgba(15, 61, 46, 0.18);
+        }
+
+        .stats-card,
+        .message-card {
+            border: 1px solid rgba(29, 107, 79, 0.12);
+            box-shadow: 0 0.75rem 1.5rem rgba(24, 49, 38, 0.06);
+        }
+
+        .stats-pill {
+            background: var(--sms-green-100);
+            color: var(--sms-green-700);
+        }
+
+        .message-item {
+            border: 0;
+            border-bottom: 1px solid rgba(29, 107, 79, 0.08);
+            padding: 1rem 0;
+        }
+
+        .message-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .avatar {
+            width: 3rem;
+            height: 3rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--sms-green-100);
+            color: var(--sms-green-700);
+            font-weight: 700;
+        }
+
+        .badge-soft-success {
+            background: rgba(47, 158, 104, 0.14);
+            color: var(--sms-green-700);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row g-4 align-items-stretch mb-4">
+            <div class="col-lg-8">
+                <div class="card hero-card text-white h-100 rounded-4">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                            <div>
+                                <span class="badge text-bg-light text-success rounded-pill px-3 py-2 mb-3">Green SMS Dashboard</span>
+                                <h1 class="display-6 fw-bold mb-2">WebSMS inbox overview</h1>
+                                <p class="mb-0 text-white-50">A clean Bootstrap layout for viewing incoming SMS activity, delivery status, and recent conversations.</p>
+                            </div>
+                            <button class="btn btn-light btn-lg text-success fw-semibold">New Message</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card stats-card h-100 rounded-4 bg-white">
+                    <div class="card-body p-4">
+                        <p class="text-uppercase text-success fw-semibold small mb-3">Today</p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Messages received</span>
+                            <span class="stats-pill rounded-pill px-3 py-2 fw-semibold">128</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Delivered</span>
+                            <span class="stats-pill rounded-pill px-3 py-2 fw-semibold">119</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Pending</span>
+                            <span class="stats-pill rounded-pill px-3 py-2 fw-semibold">9</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card message-card rounded-4 bg-white h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h2 class="h5 mb-1">Folders</h2>
+                                <p class="text-muted mb-0">Quick message groups</p>
+                            </div>
+                            <span class="badge badge-soft-success rounded-pill px-3 py-2">Active</span>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between px-0 py-3 border-0">
+                                <span>Inbox</span>
+                                <strong class="text-success">42</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between px-0 py-3 border-0">
+                                <span>Sent</span>
+                                <strong class="text-success">17</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between px-0 py-3 border-0">
+                                <span>Scheduled</span>
+                                <strong class="text-success">6</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between px-0 py-3 border-0">
+                                <span>Archived</span>
+                                <strong class="text-success">81</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card message-card rounded-4 bg-white">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                            <div>
+                                <h2 class="h4 mb-1">Recent SMS Messages</h2>
+                                <p class="text-muted mb-0">Latest customer and system message activity</p>
+                            </div>
+                            <div class="input-group" style="max-width: 280px;">
+                                <span class="input-group-text bg-success-subtle text-success border-success-subtle">Search</span>
+                                <input type="text" class="form-control border-success-subtle" placeholder="Phone or keyword">
+                            </div>
+                        </div>
+
+                        <div class="message-item">
+                            <div class="d-flex gap-3">
+                                <div class="avatar">AL</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                        <h3 class="h6 mb-0">Alice Logistics</h3>
+                                        <small class="text-muted">08:12 AM</small>
+                                    </div>
+                                    <p class="mb-2 text-muted">Pickup confirmed for order #4831. Driver will arrive in 20 minutes.</p>
+                                    <span class="badge badge-soft-success rounded-pill">Delivered</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="message-item">
+                            <div class="d-flex gap-3">
+                                <div class="avatar">MK</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                        <h3 class="h6 mb-0">Marketing Team</h3>
+                                        <small class="text-muted">07:45 AM</small>
+                                    </div>
+                                    <p class="mb-2 text-muted">Promo SMS batch sent to 3,200 subscribers. Delivery report is ready.</p>
+                                    <span class="badge badge-soft-success rounded-pill">Campaign</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="message-item">
+                            <div class="d-flex gap-3">
+                                <div class="avatar">JD</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                        <h3 class="h6 mb-0">John Doe</h3>
+                                        <small class="text-muted">Yesterday</small>
+                                    </div>
+                                    <p class="mb-2 text-muted">Please resend my verification code. The previous message did not arrive.</p>
+                                    <span class="badge text-bg-warning rounded-pill">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="message-item">
+                            <div class="d-flex gap-3">
+                                <div class="avatar">SY</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+                                        <h3 class="h6 mb-0">System Alerts</h3>
+                                        <small class="text-muted">Yesterday</small>
+                                    </div>
+                                    <p class="mb-2 text-muted">Gateway backup activated successfully. No interruption detected across outbound messages.</p>
+                                    <span class="badge badge-soft-success rounded-pill">System</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
