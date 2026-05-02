@@ -154,10 +154,12 @@ function websms_initials(?string $senderName, string $senderNumber): string
                                 <p class="mb-0 text-white-50">A minimal PHP and MySQL inbox for receiving SMS webhooks and listing recent messages.</p>
                             </div>
                             <div class="text-start text-lg-end">
-                                <div class="small text-white-50 mb-2">Database and API</div>
+                                <div class="small text-white-50 mb-2">Database and APIs</div>
                                 <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">DB: <?php echo htmlspecialchars($configuredDatabaseName, ENT_QUOTES, 'UTF-8'); ?></code>
                                 <br>
-                                <code class="bg-white rounded px-3 py-2 d-inline-block">/api/receive_sms.php</code>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">POST /api/receive_sms.php</code>
+                                <br>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block">GET /api/messages.php?limit=5</code>
                             </div>
                         </div>
                     </div>
@@ -204,8 +206,8 @@ function websms_initials(?string $senderName, string $senderNumber): string
                             <code>db/websms.sql</code>
                         </div>
 
-                        <h3 class="h6 mb-3">Example request</h3>
-                        <pre class="bg-dark text-light rounded-3 p-3 small mb-0"><code>POST /api/receive_sms.php
+                                                <h3 class="h6 mb-3">Example requests</h3>
+                                                <pre class="bg-dark text-light rounded-3 p-3 small mb-0"><code>POST /api/receive_sms.php
 Content-Type: application/json
 
 {
@@ -213,7 +215,10 @@ Content-Type: application/json
   "from": "+1555000111",
   "to": "+1555099999",
   "message": "Test SMS from gateway"
-}</code></pre>
+}
+
+GET /api/messages.php?limit=5
+GET /api/messages.php?limit=10</code></pre>
                     </div>
                 </div>
             </div>
