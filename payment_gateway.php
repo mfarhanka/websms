@@ -2,6 +2,43 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/config/database.php';
+
+$detectedPayments = [];
+$paymentsError = null;
+
+function websms_payment_amount(string $messageText): string
+{
+    if (preg_match('/(?:rm\s*)?(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)/iu', $messageText, $matches) === 1) {
+        return 'RM' . number_format((float) str_replace(',', '', (string) $matches[1]), 2, '.', '');
+    }
+
+    return '-';
+}
+
+function websms_sender_label(?string $senderName, string $senderNumber): string
+{
+    $senderName = trim((string) $senderName);
+
+    return $senderName !== '' ? $senderName : $senderNumber;
+}
+
+try {
+    $pdo = websms_database();
+    $statement = $pdo->query(
+        'SELECT id, sender_name, sender_number, message_text, status, received_at
+         FROM sms_messages
+         WHERE status = "processed"
+           AND message_text REGEXP "(RM[[:space:]]*[0-9]|[0-9]+\\.[0-9]{2})"
+         ORDER BY received_at DESC, id DESC
+         LIMIT 20'
+    );
+    $statement->execute();
+    $detectedPayments = $statement->fetchAll();
+} catch (Throwable $exception) {
+    $paymentsError = $exception->getMessage();
+}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -343,6 +380,90 @@ declare(strict_types=1);
             line-height: 1.6;
         }
 
+        .table-panel {
+            margin-top: 24px;
+            padding: 24px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .section-head h2 {
+            margin: 0 0 6px;
+            font-size: 1.25rem;
+        }
+
+        .section-head p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 22px;
+            border: 1px solid rgba(28, 26, 19, 0.08);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        thead th {
+            padding: 16px 18px;
+            text-align: left;
+            font-size: 0.84rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: rgba(28, 26, 19, 0.04);
+        }
+
+        tbody td {
+            padding: 16px 18px;
+            border-top: 1px solid rgba(28, 26, 19, 0.08);
+            vertical-align: top;
+        }
+
+        .amount-chip,
+        .detected-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .amount-chip {
+            background: rgba(15, 118, 110, 0.12);
+            color: #0f5d56;
+        }
+
+        .detected-chip {
+            background: rgba(34, 197, 94, 0.12);
+            color: #166534;
+        }
+
+        .message-snippet {
+            max-width: 34rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .empty-row,
+        .table-error {
+            padding: 18px;
+            color: var(--muted);
+        }
+
         .match-box {
             display: none;
             margin-top: 12px;
@@ -494,6 +615,51 @@ declare(strict_types=1);
                 <p>The system scans SMS entries with status <strong>received</strong> inside the latest 120 seconds. On a match, that SMS is updated to <strong>processed</strong> so one transfer cannot confirm multiple pending payments.</p>
             </div>
         </section>
+
+        <section class="panel table-panel">
+            <div class="section-head">
+                <div>
+                    <h2>Detected Payments</h2>
+                    <p>Recent SMS that were matched by the payment watch and marked as processed.</p>
+                </div>
+                <span class="detected-chip" id="detectedCount"><?php echo count($detectedPayments); ?> detected</span>
+            </div>
+
+            <?php if ($paymentsError !== null): ?>
+                <div class="table-error"><?php echo htmlspecialchars($paymentsError, ENT_QUOTES, 'UTF-8'); ?></div>
+            <?php else: ?>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Detected At</th>
+                                <th>Sender</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>SMS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detectedTableBody">
+                            <?php if ($detectedPayments === []): ?>
+                                <tr id="emptyDetectedRow">
+                                    <td class="empty-row" colspan="5">No detected payment SMS yet.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($detectedPayments as $payment): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars(date('M d, Y h:i A', strtotime((string) $payment['received_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><?php echo htmlspecialchars(websms_sender_label($payment['sender_name'], (string) $payment['sender_number']), ENT_QUOTES, 'UTF-8'); ?></td>
+                                        <td><span class="amount-chip"><?php echo htmlspecialchars(websms_payment_amount((string) $payment['message_text']), ENT_QUOTES, 'UTF-8'); ?></span></td>
+                                        <td><span class="detected-chip"><?php echo htmlspecialchars(ucfirst((string) $payment['status']), ENT_QUOTES, 'UTF-8'); ?></span></td>
+                                        <td class="message-snippet"><?php echo htmlspecialchars((string) $payment['message_text'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </section>
     </div>
 
     <script>
@@ -507,6 +673,8 @@ declare(strict_types=1);
         const matchBox = document.getElementById('matchBox');
         const matchMeta = document.getElementById('matchMeta');
         const matchMessage = document.getElementById('matchMessage');
+        const detectedTableBody = document.getElementById('detectedTableBody');
+        const detectedCount = document.getElementById('detectedCount');
         const apiUrl = new URL('api/detect_payment.php', window.location.href);
 
         let countdownInterval = null;
@@ -540,6 +708,48 @@ declare(strict_types=1);
             matchMeta.textContent = `${sender} • ${data.received_at} • status ${data.status}`;
             matchMessage.textContent = data.message_text || '';
             matchBox.classList.add('visible');
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function updateDetectedCount() {
+            if (detectedCount === null || detectedTableBody === null) {
+                return;
+            }
+
+            const rowCount = detectedTableBody.querySelectorAll('tr[data-detected-row="true"]').length;
+            detectedCount.textContent = `${rowCount} detected`;
+        }
+
+        function prependDetectedRow(data, amount) {
+            if (detectedTableBody === null) {
+                return;
+            }
+
+            const emptyRow = document.getElementById('emptyDetectedRow');
+            if (emptyRow !== null) {
+                emptyRow.remove();
+            }
+
+            const sender = data.sender_name || data.sender_number || 'Unknown sender';
+            const row = document.createElement('tr');
+            row.dataset.detectedRow = 'true';
+            row.innerHTML = `
+                <td>${escapeHtml(data.received_at || '')}</td>
+                <td>${escapeHtml(sender)}</td>
+                <td><span class="amount-chip">RM${escapeHtml(amount)}</span></td>
+                <td><span class="detected-chip">Processed</span></td>
+                <td class="message-snippet">${escapeHtml(data.message_text || '')}</td>
+            `;
+            detectedTableBody.prepend(row);
+            updateDetectedCount();
         }
 
         function stopCountdown(finalState) {
@@ -621,6 +831,7 @@ declare(strict_types=1);
                     setTimer(0);
                     setStatus('success', 'Payment received', `RM${payload.meta.amount} matched an incoming SMS and has been marked processed.`, false);
                     showMatch(payload.data);
+                    prependDetectedRow(payload.data, payload.meta.amount);
                 } else {
                     stopCountdown('Expired');
                     setStatus('error', 'No payment found', payload.message || 'No matching SMS was received within 2 minutes.', false);
