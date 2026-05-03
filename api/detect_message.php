@@ -43,8 +43,9 @@ if ($keywords === []) {
 $timeout = (int) ($_GET['timeout'] ?? 10);
 $timeout = max(1, min($timeout, 30));
 
-$sinceSeconds = (int) ($_GET['since_seconds'] ?? $timeout);
-$sinceSeconds = max($timeout, min($sinceSeconds, 3600));
+$defaultSinceSeconds = 86400;
+$sinceSeconds = (int) ($_GET['since_seconds'] ?? $defaultSinceSeconds);
+$sinceSeconds = max(1, min($sinceSeconds, $defaultSinceSeconds));
 
 $pollIntervalMicroseconds = 500000;
 $deadline = microtime(true) + $timeout;
