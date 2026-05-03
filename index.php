@@ -161,6 +161,8 @@ function websms_initials(?string $senderName, string $senderNumber): string
                                 <br>
                                 <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">GET /api/messages.php?limit=5</code>
                                 <br>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">GET /api/detect_payment.php?amount=30</code>
+                                <br>
                                 <code class="bg-white rounded px-3 py-2 d-inline-block">GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code>
                             </div>
                         </div>
@@ -171,6 +173,7 @@ function websms_initials(?string $senderName, string $senderNumber): string
                 <div class="card surface-card h-100 rounded-4 bg-white">
                     <div class="card-body p-4">
                         <p class="text-uppercase text-success fw-semibold small mb-3">Stats</p>
+                        <a href="/websms/payment_gateway.php" class="btn btn-success w-100 rounded-pill mb-4">Open Payment Gateway Watch</a>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="text-muted">Received today</span>
                             <span class="stats-pill rounded-pill px-3 py-2 fw-semibold"><?php echo (int) $stats['today_count']; ?></span>
@@ -221,6 +224,8 @@ Content-Type: application/json
 
 GET /api/messages.php?limit=5
 GET /api/messages.php?limit=10
+GET /payment_gateway.php
+GET /api/detect_payment.php?amount=30
 GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code></pre>
                     </div>
                 </div>
