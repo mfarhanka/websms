@@ -159,7 +159,9 @@ function websms_initials(?string $senderName, string $senderNumber): string
                                 <br>
                                 <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">POST /api/receive_sms.php</code>
                                 <br>
-                                <code class="bg-white rounded px-3 py-2 d-inline-block">GET /api/messages.php?limit=5</code>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block mb-2">GET /api/messages.php?limit=5</code>
+                                <br>
+                                <code class="bg-white rounded px-3 py-2 d-inline-block">GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code>
                             </div>
                         </div>
                     </div>
@@ -218,7 +220,8 @@ Content-Type: application/json
 }
 
 GET /api/messages.php?limit=5
-GET /api/messages.php?limit=10</code></pre>
+GET /api/messages.php?limit=10
+GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code></pre>
                     </div>
                 </div>
             </div>
