@@ -119,6 +119,56 @@ function websms_initials(?string $senderName, string $senderNumber): string
             padding-bottom: 0;
         }
 
+        .message-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .message-meta {
+            min-width: 0;
+        }
+
+        .message-actions {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .copy-message-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border: 1px solid rgba(29, 107, 79, 0.16);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--sms-green-700);
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .copy-message-button:hover,
+        .copy-message-button:focus-visible {
+            background: var(--sms-green-100);
+            border-color: rgba(29, 107, 79, 0.32);
+            color: var(--sms-green-900);
+            transform: translateY(-1px);
+        }
+
+        .copy-message-button.copied {
+            background: var(--sms-green-700);
+            border-color: var(--sms-green-700);
+            color: #fff;
+        }
+
+        .copy-message-button svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
         .avatar {
             width: 3rem;
             height: 3rem;
@@ -138,6 +188,13 @@ function websms_initials(?string $senderName, string $senderNumber): string
 
         code {
             color: var(--sms-green-900);
+        }
+
+        @media (max-width: 576px) {
+            .message-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
@@ -254,9 +311,24 @@ GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code></pre>
                                     <div class="d-flex gap-3">
                                         <div class="avatar"><?php echo htmlspecialchars(websms_initials($message['sender_name'], $message['sender_number']), ENT_QUOTES, 'UTF-8'); ?></div>
                                         <div class="flex-grow-1">
-                                            <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
-                                                <h3 class="h6 mb-0"><?php echo htmlspecialchars($message['sender_name'] ?: $message['sender_number'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                                <small class="text-muted"><?php echo htmlspecialchars(date('M d, Y h:i A', strtotime((string) $message['received_at'])), ENT_QUOTES, 'UTF-8'); ?></small>
+                                            <div class="message-header">
+                                                <div class="message-meta">
+                                                    <h3 class="h6 mb-0"><?php echo htmlspecialchars($message['sender_name'] ?: $message['sender_number'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                                                    <small class="text-muted"><?php echo htmlspecialchars(date('M d, Y h:i A', strtotime((string) $message['received_at'])), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                </div>
+                                                <div class="message-actions">
+                                                    <button
+                                                        type="button"
+                                                        class="copy-message-button"
+                                                        data-copy-message="<?php echo htmlspecialchars(rawurlencode((string) $message['message_text']), ENT_QUOTES, 'UTF-8'); ?>"
+                                                        aria-label="Copy message"
+                                                        title="Copy message"
+                                                    >
+                                                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                                                            <path d="M10 1.75A2.25 2.25 0 0 1 12.25 4v.25H13A2.25 2.25 0 0 1 15.25 6.5v6A2.25 2.25 0 0 1 13 14.75H7A2.25 2.25 0 0 1 4.75 12.5v-.25H4A2.25 2.25 0 0 1 1.75 10V4A2.25 2.25 0 0 1 4 1.75h6Zm1.25 4.75v-2.5A.75.75 0 0 0 10.5 3.25H4A.75.75 0 0 0 3.25 4v6c0 .414.336.75.75.75h.75V6.5A2.25 2.25 0 0 1 7 4.25h4.25A.75.75 0 0 0 11.25 6.5Zm-4.25-.75A.75.75 0 0 0 6.25 6.5v6c0 .414.336.75.75.75h6a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-.75-.75H7Z"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="small text-success mb-2">
                                                 From <?php echo htmlspecialchars($message['sender_number'], ENT_QUOTES, 'UTF-8'); ?>
@@ -276,5 +348,47 @@ GET /api/detect_message.php?keywords=PBB,RM30&amp;timeout=10</code></pre>
             </div>
         </div>
     </div>
+
+    <script>
+        async function copyMessageText(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        document.querySelectorAll('[data-copy-message]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const encodedMessage = button.getAttribute('data-copy-message') || '';
+                const messageText = decodeURIComponent(encodedMessage);
+
+                try {
+                    await copyMessageText(messageText);
+                    button.classList.add('copied');
+                    button.setAttribute('aria-label', 'Message copied');
+                    button.setAttribute('title', 'Copied');
+
+                    window.setTimeout(() => {
+                        button.classList.remove('copied');
+                        button.setAttribute('aria-label', 'Copy message');
+                        button.setAttribute('title', 'Copy message');
+                    }, 1600);
+                } catch (error) {
+                    button.setAttribute('aria-label', 'Copy failed');
+                    button.setAttribute('title', 'Copy failed');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
